@@ -1,0 +1,90 @@
+{% extends "main.html" %}
+{% block content %}
+    <div class="container">
+
+    <!-- Flash -->
+
+		{% with messages = get_flashed_messages() %}
+		  {% if messages %}
+		    <div class="flash alert alert-success alert-dismissible" role="alert">
+		      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <ul>
+		        {% for message in messages %}
+		            <li> <strong> {{ message }} </strong> </li>
+		        {% endfor %}
+		        </ul>
+		    </div>
+		  {% endif %}
+		{% endwith %}
+
+	  <form class="form-signin">
+	   	<h3 class="form-signin-heading">Please log in with your Google Account</h3>
+
+	    <!-- GOOGLE sign-in button -->
+	    <div id="signInButton">
+		    <span class="g-signin"
+		      data-scope="openid email"
+		      data-clientid="971906594561-e5vanr5j7onrvr3cq0dst73keujhkdr2.apps.googleusercontent.com"
+		      data-redirecturi="postmessage"
+		      data-accesstype="offline"
+		      data-cookiepolicy="single_host_origin"
+		      data-callback="signInCallback"
+		      data-approvalprompt="force">
+		    </span>
+		</div>
+		<!--END GOOGLE PLUS SIGN IN BUTTON -->
+
+		<div id="result">
+
+		</div>
+
+	  </form>
+
+    </div> <!-- /container -->
+
+    <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+   	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+  	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
+	<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+	<!-- Handling Google Authentication -->
+	<script type="text/javascript">
+	  function signInCallback(authResult) {
+	    // Check if the authorization with Google API has been successful
+	    if (authResult['code']) {
+	      // Hide the sign-in button now that the user is authorized,
+	      $('#signInButton').attr('style', 'display:none');
+
+	      // Pass the one-time-use code that has been returned by Google API to the server. If the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+	      $.ajax({
+	        type: 'POST',
+	        url: '/gconnect?state={{STATE}}', // Verify that the authenticated user is still in the same login session
+	        processData: false, // Tell jQuery not to process the response into a string
+	        contentType: 'application/octet-stream; charset=utf-8',
+	        data: authResult['code'], // The one-time-code per se
+	        success: function(result) {
+	          if (result) {
+	            // Specify what to do if this request is replied by a 200-successful response from the server
+	            $('#result').html(result + '<br>Redirecting...')
+	            // Redirect to the main resturant listing page after 4 seconds
+	            setTimeout(function(){
+	              window.location.href = "/rooms";
+	            }, 4000);
+
+	          } else if (authResult["error"]) {
+	            // Specify what to do in the event that an error is returned by Google
+	            console.log("There was an error: " + authResult["error"]);
+	          } else {
+	            // Specify what to do in the event that no result is returned to the callback function
+	            $('#result').html("Failed to make server side call. Check your configuration and console.");
+	          }
+	        }
+	      })
+	    }
+	  }
+	</script>
+	<!-- End Handling Google Authentication -->
+
+
+{% endblock %}

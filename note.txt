@@ -1,0 +1,90 @@
+*** Generality ***
+- User can see rooms that belongs to he/she 
+- If X owns room Y then all X also owns all items in room Y (assign item to owner on addItem() ) 
+- Only the owners of a room can rename the room and edit its items 
+
+*** Details ***
+
+leftsidebar.html
++ Remove room-modifiers when in /room/add
++ Having room-highlighter point correctly 
+
+html 
++ change all button to Pager (http://getbootstrap.com/components/#pagination) 
+
+header
++ consider user's login status 
+
+*** To-do ***
++ Fix all error-response to response object  
++ Fix "Failed to revoke token for current user" 
++ Add navigation option when the screen is small and left side bar dissapear
+
+
+*** More APIs ***
+@app.route('/room/<int:room_id>/items/JSON')
+def itemsJSON(room_id):
+	# Check if room_id exists
+	room = get_room_from_id(room_id)
+	if not room:
+		response = make_response(json.dumps("Room id {} does not exist".format(room_id)), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	email = login_session.get("email")
+
+	# Redirect to /login if user is not logged in
+	if not email:
+		response = make_response(json.dumps("Please log in at {} to get access to the API".format(url_for('login'))), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	# Get current user id:
+	user_id = getUserID(email)
+
+	# Only allow access to owner of the room
+	if user_id != room.user_id:
+		response = make_response(json.dumps("You are not owner of this room (room-id: {})".format(room_id)), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	items = session.query(Item).filter_by(room_id = room.id).all()
+	return jsonify(Items = [item.serialize for item in items])
+
+@app.route('/room/<int:room_id>/items/<int:item_id>/JSON')
+def itemJSON(room_id, item_id):
+	# Check if room_id exists
+	room = get_room_from_id(room_id)
+	if not room:
+		response = make_response(json.dumps("Room id {} does not exist".format(room_id)), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	email = login_session.get("email")
+
+	# Redirect to /login if user is not logged in
+	if not email:
+		response = make_response(json.dumps("Please log in at {} to get access to the API".format(url_for('login'))), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	# Get current user id:
+	user_id = getUserID(email)
+
+	# Only allow access to owner of the room
+	if user_id != room.user_id:
+		response = make_response(json.dumps("You are not owner of this room (room-id: {})".format(room_id)), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	item = session.query(Item).filter_by(id = item_id).one()
+
+	# Check if the item actually belongs to the room
+	if item.room_id != room.id:
+		response = make_response(json.dumps("{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name, item.id, room.name, room.id)), 401)
+		response.headers['content-type'] = 'application/json'
+		return response
+
+	return jsonify(Item=item.serialize)
+
+

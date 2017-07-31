@@ -1,0 +1,35 @@
+{% extends "main.html" %}
+{% block content %}
+
+  {% include "header.html" %}
+
+  <div class="container rooms">
+
+    <div class="row">
+
+      {% for room in rooms: %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <h2>{{room.name}}</h2>
+          <div class="btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-default"><a href="{{url_for('showItems', room_id=room.id)}}">View items</a></button>
+            <button type="button" class="btn btn-default"><a href="{{url_for('editRoom', room_id=room.id)}}">Rename</a></button>
+            <button type="button" class="btn btn-default"><a href="{{url_for('deleteRoom', room_id=room.id)}}">Delete</a></button>
+          </div>
+        </div><!-- /.col-lg-4 -->
+
+      {% endfor %}
+
+
+    </div><!-- /.row -->
+
+    <div class="row">
+      <div class="btn-group btn-group-justified" role="group" aria-label="...">
+       <div class="btn-group" role="group">
+          <button type="button" class="btn btn-default"><a href="/room/add">Add Room</a></button>
+      </div>
+    </div>
+
+  </div><!-- /.container -->
+
+
+{% endblock %}

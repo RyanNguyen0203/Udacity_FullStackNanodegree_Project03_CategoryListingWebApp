@@ -1,0 +1,25 @@
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            {% for room in rooms %}
+              {% if (room_id) and (room_id == room.id): %}
+                <li class="active">
+                  <a href="{{url_for('showItems', room_id=room_id)}}">{{room.name}}<span class="sr-only">(current)</span></a>
+                </li>
+              {% else %}
+                <li><a href="{{url_for('showItems', room_id=room.id)}}">{{room.name}}</a></li>
+              {% endif %}
+            {% endfor %}
+
+          </ul>
+
+          {% if room: %}
+          <ul class="nav nav-sidebar">
+            <li><a href="{{url_for('editRoom', room_id=room.id)}}"><strong>Rename {{room.name}}</strong></a></li>
+            <li><a href="{{url_for('deleteRoom', room_id=room.id)}}"><strong>Delete {{room.name}}</strong></a></li>
+          </ul>
+          {% endif %}
+
+          <ul class="nav nav-sidebar">
+            <li><a href="{{url_for('addRoom')}}"><strong>Add new room</strong></a></li>
+          </ul>
+        </div>
