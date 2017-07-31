@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect,jsonify, url_for, flash
+#!/usr/bin/env python3
+
+from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 from flask import session as login_session
 from flask import make_response
 
@@ -25,7 +27,7 @@ app = Flask(__name__)
 # Connect to database and create database session
 engine = create_engine('sqlite:///room_item_user.db')
 Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
+DBSession = sessionmaker(bind = engine)
 session = DBSession()
 
 # Constants
@@ -55,21 +57,21 @@ def get_rooms():
 
 def createUser(login_session):
 	# Create new user based on user's information stored in login_session
-  	newUser = User(name=login_session['username'], email=login_session['email'], picture=login_session['picture'])
-  	session.add(newUser)
-  	session.commit()
-  	user = session.query(User).filter_by(email=login_session['email']).one()
-  	return user.id
+	newUser = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'])
+	session.add(newUser)
+	session.commit()
+	user = session.query(User).filter_by(email = login_session['email']).one()
+	return user.id
 
 def getUserInfo(user_id):
 	# Return User instance given his/her id
-  	user = session.query(User).filter_by(id=user_id).one()
-  	return user
+	user = session.query(User).filter_by(id = user_id).one()
+	return user
 
 def getUserID(email):
 	# Return a user' id given his/her email address
 	try:
-		user = session.query(User).filter_by(email=email).one()
+		user = session.query(User).filter_by(email = email).one()
 		return user.id
 	except:
 		return None
@@ -83,10 +85,10 @@ def allRooms():
 	# Get all Room instances that belong to the user
 	rooms = get_rooms()
 
-	return render_template("rooms.html", rooms=rooms, login_session = login_session)
+	return render_template("rooms.html", rooms = rooms, login_session = login_session)
 
 
-@app.route('/room/add/', methods=['GET','POST'])
+@app.route('/room/add/', methods = ['GET','POST'])
 def addRoom():
 	# Add new room
 
@@ -107,9 +109,10 @@ def addRoom():
 		flash("{} is added!".format(new_room.name))
 		return redirect(url_for("allRooms"))
 	else:
-		return render_template("addroom.html", title="Add room", room_id = None, rooms = rooms, room=None, login_session = login_session)
+		return render_template("addroom.html", title = "Add room",
+		room_id = None, rooms = rooms, room = None, login_session = login_session)
 
-@app.route('/room/<int:room_id>/edit/', methods=['GET','POST'])
+@app.route('/room/<int:room_id>/edit/', methods = ['GET','POST'])
 def editRoom(room_id):
 	# Edit existing rooms
 
@@ -148,7 +151,8 @@ def editRoom(room_id):
 		else:
 			return "You must fill in room's name"
 	else:
-		return render_template("editroom.html", title="Rename room", room_id = room_id, rooms = rooms, room=room, login_session = login_session)
+		return render_template("editroom.html", title = "Rename room",
+		room_id = room_id, rooms = rooms, room = room, login_session = login_session)
 
 
 @app.route('/room/<int:room_id>/delete/')
@@ -179,7 +183,8 @@ def deleteRoom(room_id):
 	delete = request.args.get('delete')
 
 	if not delete:
-		return render_template("deleteroom.html", title="Delete room", rooms = rooms, room=room, login_session = login_session)
+		return render_template("deleteroom.html", title = "Delete room",
+		rooms = rooms, room = room, login_session = login_session)
 
 	if delete=="true":
 		# First delete all items within the room:
@@ -228,7 +233,9 @@ def showItems(room_id):
 
 	items = session.query(Item).filter_by(room_id = room_id).all()
 
-	return render_template("items.html", title="Items in {}".format(room.name), items = items, length = len(items), room_id=room_id, rooms = rooms, room = room, login_session = login_session)
+	return render_template("items.html", title = "Items in {}".format(room.name),
+	items = items, length = len(items), room_id = room_id,
+	rooms = rooms, room = room, login_session = login_session)
 
 @app.route('/room/<int:room_id>/items/<int:item_id>/')
 def showSingleItem(room_id, item_id):
@@ -258,12 +265,14 @@ def showSingleItem(room_id, item_id):
 
 	# Check if the item actually belongs to the room
 	if item.room_id != room.id:
-		return "{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name, item.id, room.name, room.id)
+		return "{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name,
+			item.id, room.name, room.id)
 
-	return render_template("item.html", title=item.name, item = item, room_id=room_id, rooms = rooms, room = room, login_session = login_session)
+	return render_template("item.html", title = item.name,
+		item = item, room_id = room_id, rooms = rooms, room = room, login_session = login_session)
 
 
-@app.route('/room/<int:room_id>/items/add/', methods=['GET','POST'])
+@app.route('/room/<int:room_id>/items/add/', methods = ['GET','POST'])
 def addItem(room_id):
 	# Add a new item to an existing room
 
@@ -295,7 +304,8 @@ def addItem(room_id):
 		description = request.form["description"]
 		price = request.form["price"]
 
-		new_item = Item(name=name, description=description, price=price, room_id=room_id, user_id = user_id)
+		new_item = Item(name = name, description = description,
+			price = price, room_id = room_id, user_id = user_id)
 
 		session.add(new_item)
 		session.commit()
@@ -304,7 +314,8 @@ def addItem(room_id):
 		return redirect(url_for("showItems", room_id = room_id))
 
 	else:
-		return render_template("additem.html", title="Add new item to {}".format(room.name), room_id=room_id, rooms = rooms, room = room, login_session = login_session)
+		return render_template("additem.html", title = "Add new item to {}".format(room.name),
+			room_id = room_id, rooms = rooms, room = room, login_session = login_session)
 
 @app.route('/room/<int:room_id>/items/<int:item_id>/edit/', methods = ["GET", "POST"])
 def editItem(room_id, item_id):
@@ -337,7 +348,8 @@ def editItem(room_id, item_id):
 
 	# Check if the item belongs to the room of id: room_id
 	if item.room_id != room.id:
-		return "{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name, item.id, room.name, room.id)
+		return "{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name,
+			item.id, room.name, room.id)
 
 	if request.method == "POST":
 		name = request.form["name"]
@@ -355,7 +367,8 @@ def editItem(room_id, item_id):
 		flash("Item edited!")
 		return redirect(url_for("showItems", room_id = room_id))
 
-	return render_template("edititem.html", title="Edit item", item = item, room_id = room_id, rooms = rooms, room = room, login_session = login_session)
+	return render_template("edititem.html", title = "Edit item", item = item,
+		room_id = room_id, rooms = rooms, room = room, login_session = login_session)
 
 @app.route('/room/<int:room_id>/items/<int:item_id>/delete/')
 def deleteItem(room_id, item_id):
@@ -388,13 +401,15 @@ def deleteItem(room_id, item_id):
 
 	# Check if the item belongs to the room of id: room_id
 	if item.room_id != room.id:
-		return "{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name, item.id, room.name, room.id)
+		return "{} (item-id: {}) does not belong to {} (room-id: {})".format(item.name,
+			item.id, room.name, room.id)
 
 	# Get query parameter
 	delete = request.args.get('delete')
 
 	if not delete:
-		return render_template("deleteitem.html", title="Delete item", item = item, rooms = rooms, room = room, login_session = login_session)
+		return render_template("deleteitem.html", title = "Delete item",
+		item = item, rooms = rooms, room = room, login_session = login_session)
 
 	if delete == "true":
 		flash("{} has been removed from {}".format(item.name, room.name))
@@ -430,7 +445,7 @@ def gconnect():
 		response.headers['content-type'] = 'application/json'
 		return (response)
 
-  	# if state paramaters match, collect the one-time-code/authorization code sent by the browser
+	# if state paramaters match, collect the one-time-code/authorization code sent by the browser
 	code = request.data
 
 	try:
@@ -490,7 +505,7 @@ def gconnect():
 	# Get user info
 	userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
 	params = {'access_token': credentials.access_token, 'alt': 'json'}
-	answer = requests.get(userinfo_url, params=params)
+	answer = requests.get(userinfo_url, params = params)
 
 	data = answer.json()
 
